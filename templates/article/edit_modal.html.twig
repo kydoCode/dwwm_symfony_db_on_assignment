@@ -1,0 +1,14 @@
+<form id="editForm{{ article.id }}" method="post" action="{{ path('article_edit', {'id': article.id}) }}">
+  <div class="mb-3">
+    <label for="editTitle{{ article.id }}" class="form-label">Titre</label>
+    <input type="text" class="form-control" id="editTitle{{ article.id }}" name="title" value="{{ article.title }}" required>
+  </div>
+  <div class="mb-3">
+    <label for="editContent{{ article.id }}" class="form-label">Contenu</label>
+    <textarea class="form-control" id="editContent{{ article.id }}" name="content" rows="5" required>{{ article.content }}</textarea>
+  </div>
+  <div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </div>
+</form>

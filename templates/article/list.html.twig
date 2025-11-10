@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des articles{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-0">Liste des Articles</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                <i class="bi bi-plus-circle"></i> Nouvel article
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for article in articles %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ article.title }}</h5>
+                <p class="card-text">{{ article.content|slice(0,120) }}...</p>
+                
+                {% if article.auteur %}
+                <p class="text-muted mb-0"><small>Par {{ article.auteur.nom }}</small></p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ article.publishedAt|date('d/m/Y') }}</small>
+                    
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailModal" data-id="{{ article.id }}">Voir</button>
+                        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ article.id }}">Modifier</button>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ article.id }}">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Aucun article</h4>
+            <p>Commencez par créer votre premier article</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">Créer un article</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createModalLabel">Créer un article</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createForm" method="post" action="{{ path('article_new') }}">
+          <div class="mb-3">
+            <label for="createTitle" class="form-label">Titre</label>
+            <input type="text" class="form-control" id="createTitle" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label for="createAuthor" class="form-label">Auteur</label>
+            <input type="text" class="form-control" id="createAuthor" name="author" required>
+          </div>
+          <div class="mb-3">
+            <label for="createContent" class="form-label">Contenu</label>
+            <textarea class="form-control" id="createContent" name="content" rows="5" required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" form="createForm" class="btn btn-primary">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailModalLabel">Détails de l'article</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div id="detail-content-area">
+          <div class="text-center py-3">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Modifier l'article</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div id="edit-content-area">
+          <div class="text-center py-3">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Supprimer l'article</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div id="delete-content-area">
+          <div class="text-center py-3">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Gestion des modales dynamiques avec AJAX
+// Ce code charge le contenu des modales via fetch() au lieu de tout charger au démarrage
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Modal de détail : charge /article/{id}
+    const detailModal = document.getElementById('detailModal');
+    detailModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const contentArea = document.getElementById('detail-content-area');
+        
+        contentArea.innerHTML = '<div class="text-center py-3"><div class="spinner-border" role="status"></div></div>';
+        
+        fetch(`/article/${id}`)
+            .then(r => r.text())
+            .then(html => { contentArea.innerHTML = html; })
+            .catch(e => { contentArea.innerHTML = '<div class="alert alert-danger">Erreur</div>'; });
+    });
+    
+    // Modal d'édition : charge /article/{id}/edit
+    const editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const contentArea = document.getElementById('edit-content-area');
+        
+        contentArea.innerHTML = '<div class="text-center py-3"><div class="spinner-border" role="status"></div></div>';
+        
+        fetch(`/article/${id}/edit`)
+            .then(r => r.text())
+            .then(html => { contentArea.innerHTML = html; })
+            .catch(e => { contentArea.innerHTML = '<div class="alert alert-danger">Erreur</div>'; });
+    });
+    
+    // Modal de suppression : charge la page de confirmation
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const contentArea = document.getElementById('delete-content-area');
+        
+        contentArea.innerHTML = '<div class="text-center py-3"><div class="spinner-border" role="status"></div></div>';
+        
+        fetch(`/article/${id}/delete`)
+            .then(r => r.text())
+            .then(html => { contentArea.innerHTML = html; })
+            .catch(e => { contentArea.innerHTML = '<div class="alert alert-danger">Erreur</div>'; });
+    });
+    
+    // Gestion des formulaires dans les modales
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (form.closest('.modal')) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    return response.text();
+                }
+            })
+            .then(html => {
+                if (html) {
+                    const modal = form.closest('.modal');
+                    const contentArea = modal.querySelector('[id$="-content-area"]');
+                    if (contentArea) {
+                        contentArea.innerHTML = html;
+                    }
+                }
+            })
+            .catch(e => console.error('Erreur:', e));
+        }
+    });
+});
+</script>
+{% endblock %}
